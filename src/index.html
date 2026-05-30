@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>독도렌트카 - 실시간 예약</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .reservation-section {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            color: #555;
+            font-weight: 600;
+            font-size: 1.05em;
+        }
+
+        .date-input-wrapper {
+            position: relative;
+        }
+
+        .date-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .date-input:hover,
+        .date-input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .time-select-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        select:hover,
+        select:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        select:disabled {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .pickup-location-group {
+            margin-top: 20px;
+        }
+
+        .pickup-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .radio-wrapper {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .radio-wrapper:hover {
+            background-color: #f5f5f5;
+        }
+
+        .radio-wrapper input[type="radio"] {
+            margin-right: 10px;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        .radio-wrapper label {
+            cursor: pointer;
+            margin: 0;
+            flex: 1;
+        }
+
+        .custom-input-wrapper {
+            display: none;
+            margin-top: 10px;
+            margin-left: 28px;
+        }
+
+        .custom-input-wrapper.active {
+            display: block;
+        }
+
+        .custom-input-wrapper input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .warning-message {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 10px;
+            color: #856404;
+            display: none;
+        }
+
+        .warning-message.active {
+            display: block;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-search {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-search:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-search:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-reset {
+            background: #e9ecef;
+            color: #333;
+        }
+
+        .btn-reset:hover {
+            background: #dee2e6;
+        }
+
+        .vehicle-list {
+            margin-top: 40px;
+            display: none;
+        }
+
+        .vehicle-list.active {
+            display: block;
+        }
+
+        .vehicle-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 5px solid #667eea;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .vehicle-card:hover {
+            transform: translateX(10px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .vehicle-name {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .vehicle-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            font-size: 0.95em;
+            color: #666;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .detail-value {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .error-message {
+            background-color: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 12px;
+            border-radius: 4px;
+            color: #721c24;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        .success-message {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 12px;
+            border-radius: 4px;
+            color: #155724;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success-message.active {
+            display: block;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h3 {
+            margin-bottom: 10px;
+        }
+
+        .info-box p {
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .reservation-section {
+                padding: 20px;
+            }
+
+            .time-select-group {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 독도렌트카</h1>
+            <p>울릉도 일주순환도로 여행을 위한 실시간 예약 시스템</p>
+        </div>
+
+        <div class="reservation-section">
+            <div class="info-box">
+                <h3>📋 예약 절차</h3>
+                <p>1️⃣ 날짜 선택 → 2️⃣ 시간 선택 → 3️⃣ 배차장소 선택 → 4️⃣ 조회</p>
+            </div>
+
+            <div id="errorMessage" class="error-message"></div>
+            <div id="successMessage" class="success-message"></div>
+
+            <form id="reservationForm">
+                <!-- 1단계: 날짜 선택 -->
+                <div class="form-group">
+                    <label class="form-label">📅 대여 기간을 선택하세요</label>
+                    <div class="date-input-wrapper">
+                        <input 
+                            type="text" 
+                            id="dateRange" 
+                            class="date-input" 
+                            placeholder="시작일 ~ 종료일을 선택하세요"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <!-- 2단계: 시간 선택 -->
+                <div class="form-group" id="timeSelectGroup" style="display: none;">
+                    <label class="form-label">⏰ 시간을 선택하세요</label>
+                    <div class="time-select-group">
+                        <div>
+                            <label class="form-label" style="font-size: 0.95em;">대여시간</label>
+                            <select id="rentalTime" required>
+                                <option value="">-- 대여시간 선택 --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label" style="font-size: 0.95em;">반납시간</label>
+                            <select id="returnTime" required disabled>
+                                <option value="">-- 반납시간 선택 --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="peakSeasonWarning" class="warning-message">
+                        ⚠️ 성수기 반납시간은 고정입니다. 배차 당일 문의가 가능합니다.
+                    </div>
+                </div>
+
+                <!-- 3단계: 배차장소 선택 -->
+                <div class="form-group" id="pickupGroup" style="display: none;">
+                    <label class="form-label">📍 배차장소를 선택하세요</label>
+                    <div class="pickup-location-group">
+                        <div class="pickup-options">
+                            <div class="radio-wrapper">
+                                <input type="radio" id="loc1" name="pickupLocation" value="울릉공항" checked>
+                                <label for="loc1">울릉공항</label>
+                            </div>
+                            <div class="radio-wrapper">
+                                <input type="radio" id="loc2" name="pickupLocation" value="사동항 (크루즈)">
+                                <label for="loc2">사동항 (크루즈)</label>
+                            </div>
+                            <div class="radio-wrapper">
+                                <input type="radio" id="loc3" name="pickupLocation" value="도동항 (엘도라도, 묵호)">
+                                <label for="loc3">도동항 (엘도라도, 묵호)</label>
+                            </div>
+                            <div class="radio-wrapper">
+                                <input type="radio" id="loc4" name="pickupLocation" value="저동항 (강릉)">
+                                <label for="loc4">저동항 (강릉)</label>
+                            </div>
+                            <div class="radio-wrapper">
+                                <input type="radio" id="locCustom" name="pickupLocation" value="custom">
+                                <label for="locCustom">직접입력</label>
+                            </div>
+                            <div class="custom-input-wrapper" id="customLocationWrapper">
+                                <input type="text" id="customLocation" placeholder="배차장소를 입력하세요">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4단계: 조회 버튼 -->
+                <div class="button-group">
+                    <button type="button" class="btn-search" id="searchBtn" disabled>🔍 조회</button>
+                    <button type="reset" class="btn-reset" id="resetBtn">🔄 초기화</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 예약 가능 차량 목록 -->
+        <div class="vehicle-list" id="vehicleList">
+            <div class="reservation-section">
+                <h2 class="section-title">예약 가능한 차량</h2>
+                <div id="vehicleContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/rangePlugin.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
